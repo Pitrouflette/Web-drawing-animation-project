@@ -262,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveData();
     }
     
-
     function generateRandom() {
         resetGrid();
         const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#ffeaa7", "#dda0dd"];
