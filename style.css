@@ -310,6 +310,31 @@ td:hover {
     color: #87ceeb;
     font-size: 10px;
 }
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); /* fond semi-transparent */
+    z-index: 1000; /* au-dessus des autres éléments */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.NameBox.modal {
+    background: #222c36;
+    padding: 2em 2em 1em 2em;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.3);
+    min-width: 320px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+.modal-actions {
+    display: flex;
+    gap: 1em;
+    justify-content: flex-end;
+}
 @media (max-width: 1024px) {
     .main-layout {
         grid-template-columns: 1fr;

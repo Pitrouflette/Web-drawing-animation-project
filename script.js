@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let cases = [];
     let cellColors = {};
     let isAnimating = false;
+    let fileName = "creation";
 
     function loadData() {
         const savedCases = JSON.parse(localStorage.getItem("drawingCases") || "[]");
@@ -280,38 +281,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadFile(event) {
-        var reader = new FileReader();
         const file = event.target.files[0];
         if (!file) return;
-        reader.readAsText(file, 'UTF-8');
-        reader.onload = function(ev) {
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
             try {
-                const jsonData = ev.target.result;
-                cellColors = jsonData.cellColors;
-                cases = jsonData.cases;
-                click = jsonData.click;
-                saveData();
-                location.reload();
+                const jsonData = JSON.parse(e.target.result);
+                
+                if (jsonData && typeof jsonData === 'object') {
+                    if (jsonData.cellColors) cellColors = jsonData.cellColors;
+                    if (jsonData.cases) cases = jsonData.cases;
+                    if (typeof jsonData.click === 'number') click = jsonData.click;
+
+                    saveData();
+                    generateTable();
+                    
+                    console.log("Fichier chargé avec succès!");
+                } else {
+                    console.error("Format de fichier invalide");
+                    alert("Format de fichier invalide");
+                }
             } catch (err) {
                 console.error("Erreur lors du chargement du fichier :", err);
+                alert("Erreur lors du chargement du fichier. Vérifiez que le fichier est au bon format JSON.");
             }
         };
+        
+        reader.onerror = function() {
+            console.error("Erreur lors de la lecture du fichier");
+            alert("Erreur lors de la lecture du fichier");
+        };
+        
+        reader.readAsText(file, 'UTF-8');
     }
     
     function saveFile() {
-        saveData();
-        location.reload();
         const data = {
             cellColors: cellColors,
             cases: cases,
             click: click
         };
     
-        const jsonStr = JSON.stringify(data);
+        const jsonStr = JSON.stringify(data, null, 2);
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
         const dlAnchorElem = document.getElementById('downloadAnchorElem');
         dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "test.json");
+        dlAnchorElem.setAttribute("download", `${fileName}.json`);
         dlAnchorElem.click();
     }
     
@@ -321,11 +337,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById("load").addEventListener("click", loadFile);
-
-    document.getElementById("save").addEventListener("click", () => {
-        saveFile()
+    document.getElementById('save').addEventListener('click', function(e) { 
+        e.preventDefault();
+        document.getElementById('modalOverlay').style.display = 'flex';
+        document.getElementById('fileName').focus();
     });
+
+    document.getElementById('modalCancelBtn').addEventListener('click', function() {
+        document.getElementById('modalOverlay').style.display = 'none';
+    });
+
+    document.getElementById('modalSaveBtn').addEventListener('click', function() {
+        const Name = document.getElementById('fileName').value.trim();
+        if(Name) {
+            fileName = Name.replace(/[^a-zA-Z0-9_\-]/g, '_');
+            document.getElementById('modalOverlay').style.display = 'none';
+            saveFile();
+        } else {
+            alert("Veuillez entrer un nom de fichier.");
+        }
+    });
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if(e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+
+    document.getElementById("load").addEventListener("change", loadFile);
 
     document.getElementById("reset").addEventListener("click", () => {
         resetGrid();
