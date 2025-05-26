@@ -23,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem("drawingCases", JSON.stringify(cases));
         localStorage.setItem("drawingColors", JSON.stringify(cellColors));
         localStorage.setItem("drawingClick", click.toString());
-
-        console.log(localStorage.getItem("drawingCases"), localStorage.getItem("drawingColors"))
     }
 
     function generateTable() {
@@ -262,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateTable();
         saveData();
     }
+    
 
     function generateRandom() {
         resetGrid();
@@ -277,14 +276,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 colorCell(cell, cellId, color);
             }
         }
-        
         saveData();
     }
 
+    function loadFile(event) {
+        var reader = new FileReader();
+        const file = event.target.files[0];
+        if (!file) return;
+        reader.readAsText(file, 'UTF-8');
+        reader.onload = function(ev) {
+            try {
+                const jsonData = ev.target.result;
+                cellColors = jsonData.cellColors;
+                cases = jsonData.cases;
+                click = jsonData.click;
+                saveData();
+                location.reload();
+            } catch (err) {
+                console.error("Erreur lors du chargement du fichier :", err);
+            }
+        };
+    }
+    
+    function saveFile() {
+        saveData();
+        location.reload();
+        const data = {
+            cellColors: cellColors,
+            cases: cases,
+            click: click
+        };
+    
+        const jsonStr = JSON.stringify(data);
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+        const dlAnchorElem = document.getElementById('downloadAnchorElem');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "test.json");
+        dlAnchorElem.click();
+    }
+    
     buttonTracer.addEventListener("click", () => {
         if (cases.length > 0) {
             tracerDebut([...cases]);
         }
+    });
+
+    document.getElementById("load").addEventListener("click", loadFile);
+
+    document.getElementById("save").addEventListener("click", () => {
+        saveFile()
     });
 
     document.getElementById("reset").addEventListener("click", () => {

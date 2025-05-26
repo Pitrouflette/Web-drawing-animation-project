@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <a id="downloadAnchorElem" style="display:none"></a>
     <div class="container">
         <div class="header">
             <h1>🎨 Tableau de Dessin</h1>
@@ -15,8 +16,6 @@
         
         <div class="main-layout">
             <div class="game-section">
-                
-                
                 <div class="game-area">
                     <table id="table"></table>
                 </div>
@@ -30,7 +29,7 @@
                                 <button class="btn-pattern" id="heart">❤️ Cœur</button>
                                 <button class="btn-pattern" id="star">⭐ Étoile</button>
                                 <button class="btn-pattern" id="tree">🌳 Arbre</button>
-                                <button class="btn-pattern" id="thumbs_up">👍 Pouce en l'aire</button>
+                                <button class="btn-pattern" id="thumbs_up">👍 Pouce en l'air</button>
                                 <button class="btn-pattern" id="landscape">⛰️ Paysage</button>
                             </div>
                         </div>
@@ -46,6 +45,13 @@
                                 </div>
                             </div>
                             <button class="btn btn-primary" id="tracer">🎬 Animer le Parcours</button>
+                        </div>
+                        <div class="control-section">
+                            <h3>💻 Fichier</h3>
+                            <div style="margin-top: 25px;">
+                                <button class="btn btn-primary" id="save">💾 Sauvegarder</button>
+                                <input type="file" id="load" accept=".json" class="btn btn-primary">
+                            </div>
                         </div>
                     </div>
                 </div>
