@@ -227,6 +227,10 @@ td:hover {
 .btn-danger:hover {
     box-shadow: 0 8px 25px rgba(229, 62, 62, 0.4);
 }
+.label-load {
+    text-align: center;
+    display: inline-block;
+}
 .speed-control {
     margin: 15px 0;
 }
@@ -334,6 +338,25 @@ td:hover {
     display: flex;
     gap: 1em;
     justify-content: flex-end;
+}
+#fileName {
+    width: 100%;
+    padding: 0.7em 1em;
+    border: none;
+    border-radius: 8px;
+    background: #1a2233;
+    color: #e2e8f0;
+    font-size: 1.1em;
+    margin-top: 0.7em;
+    margin-bottom: 1em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    outline: none;
+    transition: box-shadow 0.2s, border 0.2s;
+}
+#fileName:focus {
+    box-shadow: 0 0 0 2px #87ceeb, 0 2px 8px rgba(0,0,0,0.12);
+    background: #222c36;
+    color: #fff;
 }
 @media (max-width: 1024px) {
     .main-layout {
