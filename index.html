@@ -31,17 +31,36 @@
           <div class="game-area">
             <table id="table"></table>
           </div>
-
           <div class="bottom-controls">
             <div class="controls-grid">
               <div class="control-section">
-                <h3>🎭 Motifs Prédéfinis</h3>
-                <div class="pattern-buttons">
-                  <button class="btn-pattern" id="star">⭐ Étoile</button>
-                  <button class="btn-pattern" id="tree">🌳 Arbre</button>
+                <h3>📏 Taille</h3>
+                <div class="speed-control">
+                  <label style="color: #cbd5e0; font-size: 0.9rem"
+                    >Taille de la grille</label
+                  >
+                  <input
+                    type="range"
+                    id="sizeSlider"
+                    class="size-slider"
+                    min="10"
+                    max="30"
+                    value="200"
+                  />
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 0.8rem;
+                      margin-top: 5px;
+                      color: #87ceeb;
+                    "
+                  >
+                    <span>10x10</span>
+                    <span>30x30</span>
+                  </div>
                 </div>
               </div>
-
               <div class="control-section">
                 <h3>⚡ Animation</h3>
                 <div class="speed-control">
@@ -52,7 +71,7 @@
                     type="range"
                     id="speedSlider"
                     class="speed-slider"
-                    min="50"
+                    min="20"
                     max="500"
                     value="200"
                   />
@@ -168,33 +187,29 @@
             <h3>🎲 Actions</h3>
             <button class="btn btn-danger" id="reset">🗑️ Réinitialiser</button>
             <button class="btn btn-secondary" id="random">🎲 Aléatoire</button>
-            <div class="control-section">
-                <h3>📏 Taille</h3>
-                <div class="speed-control">
-                  <label style="color: #cbd5e0; font-size: 0.9rem"
-                    >Taille de la grille</label
-                  >
-                  <input
-                    type="range"
-                    id="sizeSlider"
-                    class="size-slider"
-                    min="10"
-                    max="30"
-                    value="200"
-                  />
-                  <div
-                    style="
-                      display: flex;
-                      justify-content: space-between;
-                      font-size: 0.8rem;
-                      margin-top: 5px;
-                      color: #87ceeb;
-                    "
-                  >
-                    <span>10x10</span>
-                    <span>30x30</span>
-                  </div>
-                </div>
+          </div>
+          <div class="rules">
+            <h3>📖 Guide d'utilisation</h3>
+            <ul>
+              <li>
+                Cliquez sur les cases pour les colorier (les numéros indiquent
+                l'ordre de coloriage)
+              </li>
+              <li>Utilisez la gomme pour effacer des cases</li>
+              <li>Le mode remplissage colorie les zones entières</li>
+              <li>Changez la vitesse d'animation de votre dessin</li>
+              <li>
+                Changez la taille de la grille de dessin comme bon vous semble
+              </li>
+              <li>
+                Vos créations sont automatiquement sauvegardées dans la mémoir
+                du navigateur
+              </li>
+              <li>
+                Téléchargez vos créations et donnez leur un nom pour les
+                réutiliser plus tard
+              </li>
+            </ul>
           </div>
         </div>
       </div>

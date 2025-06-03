@@ -307,122 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     saveData();
   }
-  const adaptivePatterns = {
-    star: function (gridSize) {
-      const pattern = [];
-      const starCells = [];
-      const center = gridSize / 2;
-      const outerRadius = gridSize * 0.4;
-      const innerRadius = gridSize * 0.2;
-
-      for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
-          const x = col - center;
-          const y = row - center;
-          const angle = Math.atan2(y, x);
-          const distance = Math.sqrt(x * x + y * y);
-
-          const angleStep = (2 * Math.PI) / 10;
-          const normalizedAngle = (angle + Math.PI) % (2 * Math.PI);
-          const sectionAngle = normalizedAngle % angleStep;
-          const isOuterSection =
-            Math.floor(normalizedAngle / angleStep) % 2 === 0;
-
-          const maxRadius = isOuterSection ? outerRadius : innerRadius;
-          const radiusAtAngle =
-            innerRadius +
-            (maxRadius - innerRadius) *
-              (1 - Math.abs(sectionAngle - angleStep / 2) / (angleStep / 2));
-
-          if (distance <= radiusAtAngle) {
-            starCells.push(row * gridSize + col + 1);
-          }
-        }
-      }
-
-      pattern.push({ cells: starCells, color: "#f6e05e" });
-      return pattern;
-    },
-
-    tree: function (gridSize) {
-      const pattern = [];
-      const trunkCells = [];
-      const leavesCells = [];
-
-      const trunkWidth = Math.max(1, Math.floor(gridSize * 0.1));
-      const trunkHeight = Math.floor(gridSize * 0.3);
-      const trunkStartCol = Math.floor((gridSize - trunkWidth) / 2);
-      const trunkStartRow = gridSize - trunkHeight;
-
-      for (let row = trunkStartRow; row < gridSize; row++) {
-        for (let col = trunkStartCol; col < trunkStartCol + trunkWidth; col++) {
-          trunkCells.push(row * gridSize + col + 1);
-        }
-      }
-
-      const leavesRadius = Math.floor(gridSize * 0.3);
-      const leavesCenter = Math.floor(gridSize / 2);
-      const leavesTopY = Math.floor(gridSize * 0.2);
-
-      const leafCenters = [
-        [leavesTopY, leavesCenter],
-        [
-          leavesTopY + Math.floor(leavesRadius * 0.7),
-          leavesCenter - Math.floor(leavesRadius * 0.5),
-        ],
-        [
-          leavesTopY + Math.floor(leavesRadius * 0.7),
-          leavesCenter + Math.floor(leavesRadius * 0.5),
-        ],
-      ];
-
-      leafCenters.forEach(([centerY, centerX]) => {
-        for (let row = 0; row < gridSize; row++) {
-          for (let col = 0; col < gridSize; col++) {
-            const distance = Math.sqrt(
-              Math.pow(row - centerY, 2) + Math.pow(col - centerX, 2)
-            );
-            if (distance <= leavesRadius) {
-              const cellId = row * gridSize + col + 1;
-              if (!leavesCells.includes(cellId)) {
-                leavesCells.push(cellId);
-              }
-            }
-          }
-        }
-      });
-
-      pattern.push({ cells: leavesCells, color: "#4fd176" });
-      pattern.push({ cells: trunkCells, color: "#6e4106" });
-      return pattern;
-    },
-  };
-  function applyPattern(patternName) {
-    if (!adaptivePatterns[patternName]) {
-      console.error(`Pattern "${patternName}" introuvable`);
-      return;
-    }
-
-    resetGrid();
-
-    const pattern = adaptivePatterns[patternName](gridSize);
-
-    pattern.forEach((group) => {
-      group.cells.forEach((cellId) => {
-        if (cellId >= 1 && cellId <= gridSize * gridSize) {
-          const cell = document.getElementById(`cell-${cellId}`);
-          if (cell) {
-            colorCell(cell, cellId, group.color);
-          }
-        }
-      });
-    });
-
-    saveData();
-    console.log(
-      `Pattern "${patternName}" appliqué sur grille ${gridSize}x${gridSize}`
-    );
-  }
 
   function loadFile(event) {
     const file = event.target.files[0];
@@ -541,16 +425,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("color").value = color;
     });
   });
-
-  document.querySelectorAll(".btn-pattern").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const patternName = btn.id;
-      console.log(`Applying pattern: ${patternName}`);
-      applyPattern(patternName);
-    });
-  });
-
-  // Initialisation
   loadData();
   generateTable();
 });
