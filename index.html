@@ -1,123 +1,204 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dessin - Animation</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="modalOverlay" class="modal-overlay" style="display:none;">
-        <div class="NameBox modal">
-            <label for="fileName">Quel nom voulez-vous donner à votre fichier ?</label>
-            <input type="text" id="fileName" autofocus>
-            <div class="modal-actions">
-                <button class="btn btn-primary" id="modalSaveBtn">Sauvegarder</button>
-                <button class="btn btn-danger" id="modalCancelBtn">Annuler</button>
-            </div>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="modalOverlay" class="modal-overlay" style="display: none">
+      <div class="NameBox modal">
+        <label for="fileName"
+          >Quel nom voulez-vous donner à votre fichier ?</label
+        >
+        <input type="text" id="fileName" autofocus />
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="modalSaveBtn">Sauvegarder</button>
+          <button class="btn btn-danger" id="modalCancelBtn">Annuler</button>
         </div>
+      </div>
     </div>
-    <a id="downloadAnchorElem" style="display:none"></a>
+    <a id="downloadAnchorElem" style="display: none"></a>
     <div class="container">
-        <div class="header">
-            <h1>🎨 Tableau de Dessin</h1>
-            <p class="subtitle">Projet NSI Charles Dubesset</p>
-        </div>
-        
-        <div class="main-layout">
-            <div class="game-section">
-                <div class="game-area">
-                    <table id="table"></table>
-                </div>
+      <div class="header">
+        <h1>🎨 Tableau de Dessin</h1>
+        <p class="subtitle">Projet NSI Charles Dubesset</p>
+      </div>
 
-                <div class="bottom-controls">
-                    <div class="controls-grid">
-                        <div class="control-section">
-                            <h3>🎭 Motifs Prédéfinis</h3>
-                            <div class="pattern-buttons">
-                                <button class="btn-pattern" id="smiley">😊 Smiley</button>
-                                <button class="btn-pattern" id="heart">❤️ Cœur</button>
-                                <button class="btn-pattern" id="star">⭐ Étoile</button>
-                                <button class="btn-pattern" id="tree">🌳 Arbre</button>
-                                <button class="btn-pattern" id="thumbs_up">👍 Pouce en l'air</button>
-                                <button class="btn-pattern" id="landscape">⛰️ Paysage</button>
-                            </div>
-                        </div>
+      <div class="main-layout">
+        <div class="game-section">
+          <div class="game-area">
+            <table id="table"></table>
+          </div>
 
-                        <div class="control-section">
-                            <h3>⚡ Animation</h3>
-                            <div class="speed-control">
-                                <label style="color: #cbd5e0; font-size: 0.9rem;">Vitesse d'animation</label>
-                                <input type="range" id="speedSlider" class="speed-slider" min="50" max="500" value="200">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 5px; color: #87ceeb;">
-                                    <span>Rapide</span>
-                                    <span>Lent</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" id="tracer">🎬 Animer le Parcours</button>
-                        </div>
-                        <div class="control-section">
-                            <h3>💻 Fichier</h3>
-                            <div style="margin-top: 25px;">
-                                <button class="btn btn-primary" id="save">💾 Sauvegarder</button>
-                                <label for="load" class="btn btn-primary label-load">📂 Charger un fichier</label>
-                                <input type="file" id="load" accept=".json" style="display:none;">
-                            </div>
-                        </div>
-                    </div>
+          <div class="bottom-controls">
+            <div class="controls-grid">
+              <div class="control-section">
+                <h3>🎭 Motifs Prédéfinis</h3>
+                <div class="pattern-buttons">
+                  <button class="btn-pattern" id="star">⭐ Étoile</button>
+                  <button class="btn-pattern" id="tree">🌳 Arbre</button>
                 </div>
+              </div>
+
+              <div class="control-section">
+                <h3>⚡ Animation</h3>
+                <div class="speed-control">
+                  <label style="color: #cbd5e0; font-size: 0.9rem"
+                    >Vitesse d'animation</label
+                  >
+                  <input
+                    type="range"
+                    id="speedSlider"
+                    class="speed-slider"
+                    min="50"
+                    max="500"
+                    value="200"
+                  />
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 0.8rem;
+                      margin-top: 5px;
+                      color: #87ceeb;
+                    "
+                  >
+                    <span>Rapide</span>
+                    <span>Lent</span>
+                  </div>
+                </div>
+                <button class="btn btn-primary" id="tracer">
+                  🎬 Animer le Parcours
+                </button>
+              </div>
+              <div class="control-section">
+                <h3>💻 Fichier</h3>
+                <div style="margin-top: 25px">
+                  <button class="btn btn-primary" id="save">
+                    💾 Sauvegarder
+                  </button>
+                  <label for="load" class="btn btn-primary label-load"
+                    >📂 Charger un fichier</label
+                  >
+                  <input
+                    type="file"
+                    id="load"
+                    accept=".json"
+                    style="display: none"
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div class="controls-panel">
-                <div class="control-section">
-                    <h3>🎨 Couleurs</h3>
-                    <div class="color-control">
-                        <input type="color" id="color" class="color-picker" value="#87ceeb">
-                        <span style="color: #cbd5e0; font-size: 0.9rem;">Couleur actuelle</span>
-                    </div>
-                    <div class="preset-colors">
-                        <div class="preset-color" style="background: #87ceeb" data-color="#87ceeb"></div>
-                        <div class="preset-color" style="background: #4fd176" data-color="#4fd176"></div>
-                        <div class="preset-color" style="background: #ce0d0d" data-color="#ce0d0d"></div>
-                        <div class="preset-color" style="background: #000000" data-color="#000000"></div>
-                        <div class="preset-color" style="background: #6b6668" data-color="#6b6668"></div>
-                        <div class="preset-color" style="background: #f6e05e" data-color="#f6e05e"></div>
-                        <div class="preset-color" style="background: #a50daa" data-color="#a50daa"></div>
-                        <div class="preset-color" style="background: #6e4106" data-color="#6e4106"></div>
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>🛠️ Outils</h3>
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="gomme" class="checkbox">
-                        <label for="gomme">Mode Gomme</label>
-                    </div>
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="fillMode" class="checkbox">
-                        <label for="fillMode">Mode Remplissage</label>
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>🎲 Actions</h3>
-                    <button class="btn btn-danger" id="reset">🗑️ Réinitialiser</button>
-                    <button class="btn btn-secondary" id="random">🎲 Aléatoire</button>
-                </div>
-                <div class="rules">
-                    <h3>📖 Guide d'utilisation</h3>
-                    <ul>
-                        <li>Cliquez sur les cases pour les colorier</li>
-                        <li>Les numéros indiquent l'ordre de coloriage</li>
-                        <li>Utilisez la gomme pour effacer des cases</li>
-                        <li>Le mode remplissage colorie les zones vides</li>
-                        <li>Vos créations sont automatiquement sauvegardées</li>
-                    </ul>
-                </div>
-            </div>
-            
+          </div>
         </div>
+
+        <div class="controls-panel">
+          <div class="control-section">
+            <h3>🎨 Couleurs</h3>
+            <div class="color-control">
+              <input
+                type="color"
+                id="color"
+                class="color-picker"
+                value="#87ceeb"
+              />
+              <span style="color: #cbd5e0; font-size: 0.9rem"
+                >Couleur actuelle</span
+              >
+            </div>
+            <div class="preset-colors">
+              <div
+                class="preset-color"
+                style="background: #87ceeb"
+                data-color="#87ceeb"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #4fd176"
+                data-color="#4fd176"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #ce0d0d"
+                data-color="#ce0d0d"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #000000"
+                data-color="#000000"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #6b6668"
+                data-color="#6b6668"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #f6e05e"
+                data-color="#f6e05e"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #a50daa"
+                data-color="#a50daa"
+              ></div>
+              <div
+                class="preset-color"
+                style="background: #6e4106"
+                data-color="#6e4106"
+              ></div>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <h3>🛠️ Outils</h3>
+            <div class="checkbox-container">
+              <input type="checkbox" id="gomme" class="checkbox" />
+              <label for="gomme">Mode Gomme</label>
+            </div>
+            <div class="checkbox-container">
+              <input type="checkbox" id="fillMode" class="checkbox" />
+              <label for="fillMode">Mode Remplissage</label>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <h3>🎲 Actions</h3>
+            <button class="btn btn-danger" id="reset">🗑️ Réinitialiser</button>
+            <button class="btn btn-secondary" id="random">🎲 Aléatoire</button>
+            <div class="control-section">
+                <h3>📏 Taille</h3>
+                <div class="speed-control">
+                  <label style="color: #cbd5e0; font-size: 0.9rem"
+                    >Taille de la grille</label
+                  >
+                  <input
+                    type="range"
+                    id="sizeSlider"
+                    class="size-slider"
+                    min="10"
+                    max="30"
+                    value="200"
+                  />
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 0.8rem;
+                      margin-top: 5px;
+                      color: #87ceeb;
+                    "
+                  >
+                    <span>10x10</span>
+                    <span>30x30</span>
+                  </div>
+                </div>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

@@ -1,391 +1,556 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const table = document.getElementById('table');
-    const buttonTracer = document.getElementById("tracer");
-    const speedSlider = document.getElementById("speedSlider");
-    
-    let click = 0;
-    let cases = [];
-    let cellColors = {};
-    let isAnimating = false;
-    let fileName = "creation";
+document.addEventListener("DOMContentLoaded", () => {
+  const table = document.getElementById("table");
+  const buttonTracer = document.getElementById("tracer");
+  const speedSlider = document.getElementById("speedSlider");
+  const speedValue = document.getElementById("speedValue");
+  const gridSizeInput = document.getElementById("sizeSlider");
+  const TDs = document.querySelectorAll("td");
 
-    function loadData() {
-        const savedCases = JSON.parse(localStorage.getItem("drawingCases") || "[]");
-        const savedColors = JSON.parse(localStorage.getItem("drawingColors") || "{}");
-        const savedClick = parseInt(localStorage.getItem("drawingClick") || "0");
-        
-        cases = savedCases;
-        cellColors = savedColors;
-        click = savedClick;
-        
+  let click = 0;
+  let cases = [];
+  let cellColors = {};
+  let isAnimating = false;
+  let fileName = "creation";
+  let gridSize = 10;
+  let isMouseDown = false;
+  let isDragging = false;
+
+  function getCellSize() {
+    const maxSize = Math.min(600, window.innerWidth - 100);
+    return Math.max(15, Math.floor(maxSize / gridSize));
+  }
+
+  function loadData() {
+    const savedCases = JSON.parse(localStorage.getItem("drawingCases") || "[]");
+    const savedColors = JSON.parse(
+      localStorage.getItem("drawingColors") || "{}"
+    );
+    const savedClick = parseInt(localStorage.getItem("drawingClick") || "0");
+    const savedGridSize = parseInt(
+      localStorage.getItem("drawingGridSize") || "10"
+    );
+
+    cases = savedCases;
+    cellColors = savedColors;
+    click = savedClick;
+    gridSize = savedGridSize;
+    gridSizeInput.value = gridSize;
+  }
+
+  function saveData() {
+    localStorage.setItem("drawingCases", JSON.stringify(cases));
+    localStorage.setItem("drawingColors", JSON.stringify(cellColors));
+    localStorage.setItem("drawingClick", click.toString());
+    localStorage.setItem("drawingGridSize", gridSize.toString());
+  }
+
+  function generateTable() {
+    table.innerHTML = "";
+    const cellSize = getCellSize();
+    const totalCells = gridSize * gridSize;
+
+    for (let i = 0; i < totalCells; i++) {
+      const row = Math.floor(i / gridSize);
+      const col = i % gridSize;
+
+      if (!table.rows[row]) {
+        table.insertRow(row);
+      }
+
+      const cell = table.rows[row].insertCell(col);
+      cell.id = `cell-${i + 1}`;
+      cell.style.width = cellSize + "px";
+      cell.style.height = cellSize + "px";
+      cell.style.fontSize = Math.max(8, Math.floor(cellSize * 0.3)) + "px";
+
+      const cellId = i + 1;
+      const caseIndex = cases.indexOf(cellId);
+      if (caseIndex !== -1) {
+        cell.style.color = cellColors[cellId] || "#000000";
+        cell.innerText = caseIndex + 1;
+      }
+
+      cell.addEventListener("mousedown", handleMouseDown);
+      cell.addEventListener("mouseenter", handleMouseEnter);
+      cell.addEventListener("mouseup", handleMouseUp);
     }
 
-    function saveData() {
-        localStorage.setItem("drawingCases", JSON.stringify(cases));
-        localStorage.setItem("drawingColors", JSON.stringify(cellColors));
-        localStorage.setItem("drawingClick", click.toString());
+    document.addEventListener("mouseup", () => {
+      isMouseDown = false;
+      isDragging = false;
+    });
+
+    table.addEventListener("selectstart", (e) => e.preventDefault());
+  }
+
+  function handleMouseDown(event) {
+    event.preventDefault();
+    isMouseDown = true;
+    isDragging = false;
+    handleCellClick(event);
+  }
+
+  function handleMouseEnter(event) {
+    if (isMouseDown) {
+      isDragging = true;
+      handleCellClick(event);
+    }
+  }
+
+  function handleMouseUp(event) {
+    isMouseDown = false;
+    if (!isDragging) {
+      // Si on n'a pas fait de drag, on traite comme un clic normal
+      handleCellClick(event);
+    }
+    isDragging = false;
+  }
+
+  function handleCellClick(event) {
+    if (isAnimating) return;
+
+    const cell = event.target;
+    const cellId = parseInt(cell.id.replace("cell-", ""));
+    const color = document.getElementById("color").value;
+    const gomme = document.getElementById("gomme").checked;
+    const fillModeActive = document.getElementById("fillMode").checked;
+
+    if (gomme) {
+      eraseCell(cell, cellId);
+    } else if (fillModeActive && !isDragging) {
+      // Le remplissage ne fonctionne qu'au clic, pas en drag
+      fillArea(cellId, color);
+    } else if (!fillModeActive) {
+      colorCell(cell, cellId, color);
     }
 
-    function generateTable() {
-        table.innerHTML = '';
-        for (let i = 0; i < 100; i++) {
-            const row = Math.floor(i / 10);
-            const col = i % 10;
-            const cell = document.createElement('td');
-            cell.id = `cell-${i + 1}`;
-            
-            if (!table.rows[row]) {
-                table.insertRow(row);
-            }
-            table.rows[row].insertCell(col).appendChild(cell);
-            
-            const cellId = i + 1;
-            const caseIndex = cases.indexOf(cellId);
-            if (caseIndex !== -1) {
-                cell.style.color = cellColors[cellId] || "#000000";
-                cell.innerText = caseIndex + 1;
-            }
-            
-            cell.addEventListener("click", handleCellClick);
+    saveData();
+  }
+
+  function colorCell(cell, cellId, color) {
+    const isAlreadyPainted = cases.includes(cellId);
+
+    if (isAlreadyPainted) {
+      cell.style.color = color;
+      cellColors[cellId] = color;
+    } else {
+      cell.style.color = color;
+      cell.innerText = click + 1;
+      cases.push(cellId);
+      cellColors[cellId] = color;
+      click++;
+    }
+  }
+
+  function eraseCell(cell, cellId) {
+    if (cell.innerHTML === "") return;
+
+    const caseIndex = cases.indexOf(cellId);
+    if (caseIndex !== -1) {
+      cases.splice(caseIndex, 1);
+      delete cellColors[cellId];
+      cell.innerHTML = "";
+      cell.style.color = "";
+      cell.style.backgroundColor = "";
+      click--;
+
+      renumberCells();
+    }
+  }
+
+  function renumberCells() {
+    cases.forEach((cellId, index) => {
+      const cell = document.getElementById(`cell-${cellId}`);
+      if (cell) {
+        cell.innerText = index + 1;
+      }
+    });
+  }
+
+  function fillArea(startCellId, newColor) {
+    const startCell = document.getElementById(`cell-${startCellId}`);
+    if (!startCell) return;
+
+    const originalColor = cellColors[startCellId] || null;
+    const isOriginalEmpty = !cases.includes(startCellId);
+
+    if (!isOriginalEmpty && originalColor === newColor) return;
+
+    const visited = new Set();
+    const queue = [startCellId];
+    const cellsToFill = [];
+    const totalCells = gridSize * gridSize;
+
+    while (queue.length > 0) {
+      const currentId = queue.shift();
+
+      if (visited.has(currentId)) continue;
+      visited.add(currentId);
+
+      if (currentId < 1 || currentId > totalCells) continue;
+
+      const currentCell = document.getElementById(`cell-${currentId}`);
+      if (!currentCell) continue;
+
+      const currentCellColor = cellColors[currentId] || null;
+      const isCurrentEmpty = !cases.includes(currentId);
+      const shouldFill =
+        (isOriginalEmpty && isCurrentEmpty) ||
+        (!isOriginalEmpty &&
+          !isCurrentEmpty &&
+          currentCellColor === originalColor);
+
+      if (shouldFill) {
+        cellsToFill.push(currentId);
+
+        const row = Math.floor((currentId - 1) / gridSize);
+        const col = (currentId - 1) % gridSize;
+
+        const neighbors = [];
+
+        if (row > 0) neighbors.push((row - 1) * gridSize + col + 1);
+        if (row < gridSize - 1) neighbors.push((row + 1) * gridSize + col + 1);
+        if (col > 0) neighbors.push(row * gridSize + col);
+        if (col < gridSize - 1) neighbors.push(row * gridSize + col + 2);
+
+        neighbors.forEach((neighborId) => {
+          if (!visited.has(neighborId)) {
+            queue.push(neighborId);
+          }
+        });
+      }
+    }
+
+    cellsToFill.forEach((id) => {
+      const cell = document.getElementById(`cell-${id}`);
+      const wasAlreadyPainted = cases.includes(id);
+
+      if (wasAlreadyPainted) {
+        cell.style.color = newColor;
+        cellColors[id] = newColor;
+      } else {
+        colorCell(cell, id, newColor);
+      }
+    });
+  }
+
+  async function tracer(cellId) {
+    const speed = parseInt(speedSlider.value);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const cell = document.getElementById(`cell-${cellId}`);
+        if (cell) {
+          cell.innerText = "";
+          cell.style.backgroundColor = cell.style.color;
+          cell.classList.add("traced");
+          setTimeout(() => {
+            cell.classList.remove("traced");
+          }, 600);
         }
+        resolve();
+      }, speed);
+    });
+  }
+
+  async function tracerDebut(casesToTrace) {
+    isAnimating = true;
+    for (let i = 0; i < casesToTrace.length; i++) {
+      await tracer(casesToTrace[i]);
+    }
+    isAnimating = false;
+  }
+
+  function updateGrid() {
+    const newSize = parseInt(gridSizeInput.value);
+    if (newSize >= 5 && newSize <= 50) {
+      gridSize = newSize;
+      resetGrid();
+    }
+    TDs.forEach((td) => {
+      td.style.width = 1 / gridSize + "px";
+      td.style.height = 1 / gridSize + "px";
+      td.style.fontSize = Math.max(8, Math.floor((1 / gridSize) * 0.3)) + "px";
+    });
+  }
+
+  function resetGrid() {
+    click = 0;
+    cases = [];
+    cellColors = {};
+    generateTable();
+    saveData();
+  }
+
+  function generateRandom() {
+    resetGrid();
+    const colors = [
+      "#ff6b6b",
+      "#4ecdc4",
+      "#45b7d1",
+      "#96ceb4",
+      "#ffeaa7",
+      "#dda0dd",
+    ];
+    const totalCells = gridSize * gridSize;
+    const numCells =
+      Math.floor(Math.random() * Math.floor(totalCells * 0.3)) +
+      Math.floor(totalCells * 0.2);
+
+    for (let i = 0; i < numCells; i++) {
+      const cellId = Math.floor(Math.random() * totalCells) + 1;
+      const cell = document.getElementById(`cell-${cellId}`);
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      if (cell && cell.innerText === "") {
+        colorCell(cell, cellId, color);
+      }
+    }
+    saveData();
+  }
+  const adaptivePatterns = {
+    star: function (gridSize) {
+      const pattern = [];
+      const starCells = [];
+      const center = gridSize / 2;
+      const outerRadius = gridSize * 0.4;
+      const innerRadius = gridSize * 0.2;
+
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const x = col - center;
+          const y = row - center;
+          const angle = Math.atan2(y, x);
+          const distance = Math.sqrt(x * x + y * y);
+
+          const angleStep = (2 * Math.PI) / 10;
+          const normalizedAngle = (angle + Math.PI) % (2 * Math.PI);
+          const sectionAngle = normalizedAngle % angleStep;
+          const isOuterSection =
+            Math.floor(normalizedAngle / angleStep) % 2 === 0;
+
+          const maxRadius = isOuterSection ? outerRadius : innerRadius;
+          const radiusAtAngle =
+            innerRadius +
+            (maxRadius - innerRadius) *
+              (1 - Math.abs(sectionAngle - angleStep / 2) / (angleStep / 2));
+
+          if (distance <= radiusAtAngle) {
+            starCells.push(row * gridSize + col + 1);
+          }
+        }
+      }
+
+      pattern.push({ cells: starCells, color: "#f6e05e" });
+      return pattern;
+    },
+
+    tree: function (gridSize) {
+      const pattern = [];
+      const trunkCells = [];
+      const leavesCells = [];
+
+      const trunkWidth = Math.max(1, Math.floor(gridSize * 0.1));
+      const trunkHeight = Math.floor(gridSize * 0.3);
+      const trunkStartCol = Math.floor((gridSize - trunkWidth) / 2);
+      const trunkStartRow = gridSize - trunkHeight;
+
+      for (let row = trunkStartRow; row < gridSize; row++) {
+        for (let col = trunkStartCol; col < trunkStartCol + trunkWidth; col++) {
+          trunkCells.push(row * gridSize + col + 1);
+        }
+      }
+
+      const leavesRadius = Math.floor(gridSize * 0.3);
+      const leavesCenter = Math.floor(gridSize / 2);
+      const leavesTopY = Math.floor(gridSize * 0.2);
+
+      const leafCenters = [
+        [leavesTopY, leavesCenter],
+        [
+          leavesTopY + Math.floor(leavesRadius * 0.7),
+          leavesCenter - Math.floor(leavesRadius * 0.5),
+        ],
+        [
+          leavesTopY + Math.floor(leavesRadius * 0.7),
+          leavesCenter + Math.floor(leavesRadius * 0.5),
+        ],
+      ];
+
+      leafCenters.forEach(([centerY, centerX]) => {
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const distance = Math.sqrt(
+              Math.pow(row - centerY, 2) + Math.pow(col - centerX, 2)
+            );
+            if (distance <= leavesRadius) {
+              const cellId = row * gridSize + col + 1;
+              if (!leavesCells.includes(cellId)) {
+                leavesCells.push(cellId);
+              }
+            }
+          }
+        }
+      });
+
+      pattern.push({ cells: leavesCells, color: "#4fd176" });
+      pattern.push({ cells: trunkCells, color: "#6e4106" });
+      return pattern;
+    },
+  };
+  function applyPattern(patternName) {
+    if (!adaptivePatterns[patternName]) {
+      console.error(`Pattern "${patternName}" introuvable`);
+      return;
     }
 
-    function handleCellClick(event) {
-        if (isAnimating) return;
-        
-        const cell = event.target;
-        const cellId = parseInt(cell.id.replace('cell-', ''));
-        const color = document.getElementById("color").value;
-        const gomme = document.getElementById("gomme").checked;
-        const fillModeActive = document.getElementById("fillMode").checked;
+    resetGrid();
 
-        if (gomme) {
-            eraseCell(cell, cellId);
-        } else if (fillModeActive) {
-            fillArea(cellId, color);
+    const pattern = adaptivePatterns[patternName](gridSize);
+
+    pattern.forEach((group) => {
+      group.cells.forEach((cellId) => {
+        if (cellId >= 1 && cellId <= gridSize * gridSize) {
+          const cell = document.getElementById(`cell-${cellId}`);
+          if (cell) {
+            colorCell(cell, cellId, group.color);
+          }
+        }
+      });
+    });
+
+    saveData();
+    console.log(
+      `Pattern "${patternName}" appliqué sur grille ${gridSize}x${gridSize}`
+    );
+  }
+
+  function loadFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const jsonData = JSON.parse(e.target.result);
+
+        if (jsonData && typeof jsonData === "object") {
+          if (jsonData.cellColors) cellColors = jsonData.cellColors;
+          if (jsonData.cases) cases = jsonData.cases;
+          if (typeof jsonData.click === "number") click = jsonData.click;
+          if (typeof jsonData.gridSize === "number") {
+            gridSize = jsonData.gridSize;
+            gridSizeInput.value = gridSize;
+          }
+
+          saveData();
+          generateTable();
+
+          console.log("Fichier chargé avec succès!");
         } else {
-            colorCell(cell, cellId, color);
+          console.error("Format de fichier invalide");
+          alert("Format de fichier invalide");
         }
-        
-        saveData();
-    }
-
-    function colorCell(cell, cellId, color) {
-        const isAlreadyPainted = cases.includes(cellId);
-        
-        if (isAlreadyPainted) {
-            cell.style.color = color;
-            cellColors[cellId] = color;
-        } else {
-            cell.style.color = color;
-            cell.innerText = click + 1;
-            cases.push(cellId);
-            cellColors[cellId] = color;
-            click++;
-        }
-    }
-    
-    function eraseCell(cell, cellId) {
-        if (cell.innerHTML === "") return;
-        
-        const caseIndex = cases.indexOf(cellId);
-        if (caseIndex !== -1) {
-            cases.splice(caseIndex, 1);
-            delete cellColors[cellId];
-            cell.innerHTML = "";
-            cell.style.color = "";
-            cell.style.backgroundColor = "";
-            click--;
-            
-            renumberCells();
-        }
-    }
-
-    function renumberCells() {
-        cases.forEach((cellId, index) => {
-            const cell = document.getElementById(`cell-${cellId}`);
-            if (cell) {
-                cell.innerText = index + 1;
-            }
-        });
-    }
-
-    function fillArea(startCellId, newColor) {
-        const startCell = document.getElementById(`cell-${startCellId}`);
-        if (!startCell) return;
-
-        const originalColor = cellColors[startCellId] || null;
-        const isOriginalEmpty = !cases.includes(startCellId);
-
-        if (!isOriginalEmpty && originalColor === newColor) return;
-        
-        const visited = new Set();
-        const queue = [startCellId];
-        const cellsToFill = [];
-
-        while (queue.length > 0) {
-            const currentId = queue.shift();
-
-            if (visited.has(currentId)) continue;
-            visited.add(currentId);
-
-            if (currentId < 1 || currentId > 100) continue;
-            
-            const currentCell = document.getElementById(`cell-${currentId}`);
-            if (!currentCell) continue;
-            
-            const currentCellColor = cellColors[currentId] || null;
-            const isCurrentEmpty = !cases.includes(currentId);
-            const shouldFill = (isOriginalEmpty && isCurrentEmpty) || 
-                              (!isOriginalEmpty && !isCurrentEmpty && currentCellColor === originalColor);
-            
-            if (shouldFill) {
-                cellsToFill.push(currentId);
-
-                const row = Math.floor((currentId - 1) / 10);
-                const col = (currentId - 1) % 10;
-
-                const neighbors = [];
-                
-                if (row > 0) neighbors.push((row - 1) * 10 + col + 1);
-                if (row < 9) neighbors.push((row + 1) * 10 + col + 1);
-                if (col > 0) neighbors.push(row * 10 + col);
-                if (col < 9) neighbors.push(row * 10 + col + 2);
-
-                neighbors.forEach(neighborId => {
-                    if (!visited.has(neighborId)) {
-                        queue.push(neighborId);
-                    }
-                });
-            }
-        }
-
-        cellsToFill.forEach(id => {
-            const cell = document.getElementById(`cell-${id}`);
-            const wasAlreadyPainted = cases.includes(id);
-            
-            if (wasAlreadyPainted) {
-                click += 1
-                cell.style.color = newColor;
-                cell.innerText = click + 1
-                cellColors[id] = newColor;
-            } else {
-                colorCell(cell, id, newColor);
-            }
-        });
-    }
-
-    async function tracer(cellId) {
-        const speed = parseInt(speedSlider.value);
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const cell = document.getElementById(`cell-${cellId}`);
-                if (cell) {
-                    cell.innerText = "";
-                    cell.style.backgroundColor = cell.style.color;
-                    cell.classList.add("traced");
-                    setTimeout(() => {
-                        cell.classList.remove("traced");
-                    }, 600);
-                }
-                resolve();
-            }, speed);
-        });
-    }
-
-    async function tracerDebut(casesToTrace) {
-        isAnimating = true;
-        for (let i = 0; i < casesToTrace.length; i++) {
-            await tracer(casesToTrace[i]);
-        }
-        isAnimating = false;
-    }
-
-    const patterns = {
-        smiley: [
-            {cells: [14,24,34], color: "#f6e05e"},
-            {cells: [17,27,37], color: "#f6e05e"},
-            {cells: [52, 53, 63, 64, 74, 75, 76, 77, 67, 68, 58, 59], color: "#f6e05e"}
-        ],
-        heart: [
-            {cells: [13, 17], color: "#ce0d0d"},
-            {cells: [22, 23, 24, 26, 27, 28], color: "#ce0d0d"},
-            {cells: [31, 32, 33, 34, 35, 36, 37, 38, 39], color: "#ce0d0d"},
-            {cells: [42, 43, 44, 45, 46, 47, 48], color: "#ce0d0d"},
-            {cells: [53, 54, 55, 56, 57], color: "#ce0d0d"},
-            {cells: [64, 65, 66], color: "#ce0d0d"},
-            {cells: [75], color: "#ce0d0d"}
-        ],
-        star: [
-            { cells: [6, 15, 16, 17, 25, 26, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 46, 48, 49, 54, 56, 58, 
-                64, 65, 66, 67, 68, 73, 74, 75, 77, 78, 79, 83, 84, 88, 89], color: "#f6e05e" },
-            { cells: [45, 55, 47, 57], color: "#000000" },
-        ],
-        tree: [
-            {cells: [25, 34, 35, 36, 43, 44, 45, 46, 47, 53, 54, 55, 56, 57, 63, 64, 65, 66, 67], color: "#4fd176"},
-            {cells: [75, 84, 85, 86], color: "#6e4106"}
-        ],
-        thumbs_up: [
-            {cells: [6, 15, 17, 25, 27,34, 37, 38, 39,44, 50, 51, 52, 53,59, 60, 61, 63,70, 71, 73, 79,80, 81, 83, 90, 
-                91, 92, 93, 94, 95, 96, 97, 98, 99], color: "#000000"},
-            {cells: [16, 26,35, 36,45, 46, 47, 48, 49,54, 55, 56, 57, 58,62, 64, 65, 66, 67, 68, 69,72, 74, 75, 76, 77, 
-                78,82, 84, 85, 86, 87, 88, 89], color: "#f6e05e"}
-        ],
-        landscape: [
-            {cells: [1, 2, 3,11, 12, 13,21, 22], color: "#f6e05e"},
-            {cells: [4, 5, 6, 7, 8, 9, 10,14, 15, 16, 17, 18, 19, 20,23, 24, 25, 26, 27, 28, 29, 30,31, 32, 33, 34, 35,
-                36, 37, 38,40, 41, 42, 43, 44, 45, 46, 47,51, 52, 53, 54, 55, 56, 57,61, 62, 63, 64, 65, 66, 67, 68,70, 
-                71, 72, 73, 74, 75, 76, 77, 78,80], color: "#87ceeb"},
-            {cells: [39,48, 49, 50,58, 59, 60,81, 82, 83, 84, 85, 86, 87, 88, 89,90, 91, 92, 93, 94, 95, 96, 97, 98, 99,
-                100], color: "#4fd176"},
-            {cells: [69, 79], color: "#6e4106"}
-        ]
+      } catch (err) {
+        console.error("Erreur lors du chargement du fichier :", err);
+        alert(
+          "Erreur lors du chargement du fichier. Vérifiez que le fichier est au bon format JSON."
+        );
+      }
     };
 
-    function applyPattern(patternName) {
-        if (!patterns[patternName]) return;
-        
-        resetGrid();
-        const pattern = patterns[patternName];
-        
-        pattern.forEach(group => {
-            group.cells.forEach(cellId => {
-                const cell = document.getElementById(`cell-${cellId}`);
-                if (cell) {
-                    colorCell(cell, cellId, group.color);
-                }
-            });
-        });
-        saveData();
+    reader.onerror = function () {
+      console.error("Erreur lors de la lecture du fichier");
+      alert("Erreur lors de la lecture du fichier");
+    };
+
+    reader.readAsText(file, "UTF-8");
+  }
+
+  function saveFile() {
+    const data = {
+      cellColors: cellColors,
+      cases: cases,
+      click: click,
+      gridSize: gridSize,
+    };
+
+    const jsonStr = JSON.stringify(data, null, 2);
+    const dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+    const dlAnchorElem = document.getElementById("downloadAnchorElem");
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `${fileName}.json`);
+    dlAnchorElem.click();
+  }
+
+  // Event listeners
+  speedSlider.addEventListener("input", () => {
+    speedValue.textContent = speedSlider.value;
+  });
+
+  gridSizeInput.addEventListener("change", () => {
+    updateGrid();
+  });
+
+  buttonTracer.addEventListener("click", () => {
+    if (cases.length > 0) {
+      tracerDebut([...cases]);
     }
+  });
 
-    function resetGrid() {
-        click = 0;
-        cases = [];
-        cellColors = {};
-        generateTable();
-        saveData();
-    }
+  document.getElementById("save").addEventListener("click", function (e) {
+    e.preventDefault();
+    document.getElementById("modalOverlay").style.display = "flex";
+    document.getElementById("fileName").focus();
+  });
 
-    function generateRandom() {
-        resetGrid();
-        const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#ffeaa7", "#dda0dd"];
-        const numCells = Math.floor(Math.random() * 20) + 30;
-        
-        for (let i = 0; i < numCells; i++) {
-            const cellId = Math.floor(Math.random() * 100) + 1;
-            const cell = document.getElementById(`cell-${cellId}`);
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            
-            if (cell && cell.innerText === "") {
-                colorCell(cell, cellId, color);
-            }
-        }
-        saveData();
-    }
-
-    function loadFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const jsonData = JSON.parse(e.target.result);
-                
-                if (jsonData && typeof jsonData === 'object') {
-                    if (jsonData.cellColors) cellColors = jsonData.cellColors;
-                    if (jsonData.cases) cases = jsonData.cases;
-                    if (typeof jsonData.click === 'number') click = jsonData.click;
-
-                    saveData();
-                    generateTable();
-                    
-                    console.log("Fichier chargé avec succès!");
-                } else {
-                    console.error("Format de fichier invalide");
-                    alert("Format de fichier invalide");
-                }
-            } catch (err) {
-                console.error("Erreur lors du chargement du fichier :", err);
-                alert("Erreur lors du chargement du fichier. Vérifiez que le fichier est au bon format JSON.");
-            }
-        };
-        
-        reader.onerror = function() {
-            console.error("Erreur lors de la lecture du fichier");
-            alert("Erreur lors de la lecture du fichier");
-        };
-        
-        reader.readAsText(file, 'UTF-8');
-    }
-    
-    function saveFile() {
-        const data = {
-            cellColors: cellColors,
-            cases: cases,
-            click: click
-        };
-    
-        const jsonStr = JSON.stringify(data, null, 2);
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
-        const dlAnchorElem = document.getElementById('downloadAnchorElem');
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", `${fileName}.json`);
-        dlAnchorElem.click();
-    }
-    
-    buttonTracer.addEventListener("click", () => {if (cases.length > 0) {tracerDebut([...cases]);}});
-
-    document.getElementById('save').addEventListener('click', function(e) { 
-        e.preventDefault();
-        document.getElementById('modalOverlay').style.display = 'flex';
-        document.getElementById('fileName').focus();
+  document
+    .getElementById("modalCancelBtn")
+    .addEventListener("click", function () {
+      document.getElementById("modalOverlay").style.display = "none";
     });
 
-    document.getElementById('modalCancelBtn').addEventListener('click', function() {
-        document.getElementById('modalOverlay').style.display = 'none';
+  document
+    .getElementById("modalSaveBtn")
+    .addEventListener("click", function () {
+      const Name = document.getElementById("fileName").value.trim();
+      if (Name) {
+        fileName = Name.replace(/[^a-zA-Z0-9_\-]/g, "_");
+        document.getElementById("modalOverlay").style.display = "none";
+        saveFile();
+      } else {
+        alert("Veuillez entrer un nom de fichier.");
+      }
     });
 
-    document.getElementById('modalSaveBtn').addEventListener('click', function() {
-        const Name = document.getElementById('fileName').value.trim();
-        if(Name) {
-            fileName = Name.replace(/[^a-zA-Z0-9_\-]/g, '_');
-            document.getElementById('modalOverlay').style.display = 'none';
-            saveFile();
-        } else {
-            alert("Veuillez entrer un nom de fichier.");
-        }
-    });
-    document.getElementById('modalOverlay').addEventListener('click', function(e) {
-        if(e.target === this) {
-            this.style.display = 'none';
-        }
+  document
+    .getElementById("modalOverlay")
+    .addEventListener("click", function (e) {
+      if (e.target === this) {
+        this.style.display = "none";
+      }
     });
 
-    document.getElementById("load").addEventListener("change", loadFile);
+  document.getElementById("load").addEventListener("change", loadFile);
+  document.getElementById("reset").addEventListener("click", resetGrid);
+  document.getElementById("random").addEventListener("click", generateRandom);
 
-    document.getElementById("reset").addEventListener("click", () => {
-        resetGrid();
+  document.querySelectorAll(".preset-color").forEach((colorDiv) => {
+    colorDiv.addEventListener("click", () => {
+      const color = colorDiv.dataset.color;
+      document.getElementById("color").value = color;
     });
+  });
 
-    document.getElementById("random").addEventListener("click", () => {
-        generateRandom();
+  document.querySelectorAll(".btn-pattern").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const patternName = btn.id;
+      console.log(`Applying pattern: ${patternName}`);
+      applyPattern(patternName);
     });
+  });
 
-    document.querySelectorAll('.preset-color').forEach(colorDiv => {
-        colorDiv.addEventListener('click', () => {
-            const color = colorDiv.dataset.color;
-            document.getElementById('color').value = color;
-        });
-    });
-
-    Object.keys(patterns).forEach(patternName => {
-        document.getElementById(patternName).addEventListener('click', () => {
-            applyPattern(patternName);
-        });
-    });
-
-    loadData();
-    generateTable();
+  // Initialisation
+  loadData();
+  generateTable();
 });
