@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const speedValue = document.getElementById("speedValue");
   const gridSizeInput = document.getElementById("sizeSlider");
   const TDs = document.querySelectorAll("td");
-
   let click = 0;
   let cases = [];
   let cellColors = {};
@@ -14,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let gridSize = 10;
   let isMouseDown = false;
   let isDragging = false;
-
   function getCellSize() {
     const maxSize = Math.min(600, window.innerWidth - 100);
     return Math.max(15, Math.floor(maxSize / gridSize));
@@ -308,6 +306,40 @@ document.addEventListener("DOMContentLoaded", () => {
     saveData();
   }
 
+  function loadJSONFromURL(url) {
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error("Fichier introuvable ou erreur de chargement");
+        return response.json();
+      })
+      .then(jsonData => {
+        if (jsonData && typeof jsonData === "object") {
+          if (jsonData.cellColors) cellColors = jsonData.cellColors;
+          if (jsonData.cases) cases = jsonData.cases;
+          if (typeof jsonData.click === "number") click = jsonData.click;
+          if (typeof jsonData.gridSize === "number") {
+            gridSize = jsonData.gridSize;
+            if (typeof gridSizeInput !== "undefined") {
+              gridSizeInput.value = gridSize;
+            }
+          }
+  
+          saveData();
+          generateTable();
+  
+          console.log("Fichier chargé avec succès !");
+        } else {
+          console.error("Format de fichier invalide");
+          alert("Format de fichier invalide");
+        }
+      })
+      .catch(err => {
+        console.error("Erreur lors du chargement du fichier :", err);
+        alert("Erreur lors du chargement du fichier JSON.");
+      });
+  }
+  
+
   function loadFile(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -425,6 +457,15 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("color").value = color;
     });
   });
+
+  document.querySelectorAll(".btn-pattern").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const patternName = btn.id;
+      console.log(`Applying pattern: ${patternName}`);
+      loadJSONFromURL(`./patterns/${patternName}.json`);
+    });
+  });
+
   loadData();
   generateTable();
 });
