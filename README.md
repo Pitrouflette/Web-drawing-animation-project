@@ -25,6 +25,6 @@ cd Web-drawing-animation-project
 Pour bénéficier d'un server local :
 ```bash
 npm run dev
-Sinon, ouvrez simplement index.html dans votre navigateur.
 ```
 Puis rendez - vous sur votre [localhost](http://localhost:3000)
+Sinon, ouvrez simplement index.html dans votre navigateur.
