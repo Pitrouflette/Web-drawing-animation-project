@@ -4,7 +4,7 @@ Ce projet permet de dessiner librement sur une toile HTML5 et de visualiser une 
 
 ## Getting Started
 
-Ces instructions vous permettront de lancer une version locale du projet pour le développement ou les tests. Voir la section Déploiement pour des infos sur la mise en ligne.
+Ces instructions vous permettront de lancer une version locale du projet pour le développement ou les tests.
 
 ### Prerequisites
 
