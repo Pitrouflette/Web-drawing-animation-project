@@ -6,13 +6,12 @@ Ce projet permet de dessiner librement sur une toile HTML5 et de visualiser une 
 
 Ces instructions vous permettront de lancer une version locale du projet pour le développement ou les tests.
 
-### Prerequisites
+### Prerequis
 
 Avant de commencer, assurez-vous d’avoir :
 
 * Un navigateur web moderne (Chrome, Firefox, etc.)
-* [Node.js](https://nodejs.org/) installé (si vous utilisez la version avec serveur local)
-* Un éditeur de texte (ex : VS Code)
+* Un éditeur de texte (ex : VSCode)
 
 ### Installation
 
@@ -22,9 +21,8 @@ Clonez ce dépôt et ouvrez le projet localement :
 git clone https://github.com/Pitrouflette/Web-drawing-animation-project.git
 cd Web-drawing-animation-project
 ```
-Pour bénéficier d'un server local :
+Pour modifier le projet avec VSCode :
 ```bash
-npm run dev
+code .
 ```
-Puis rendez - vous sur votre [localhost](http://localhost:3000)
-Sinon, ouvrez simplement index.html dans votre navigateur.
+Pour acceder au site, ouvrer simplement le index.html dans votre navigateur, ou utilisez l'extension liveServer de VSCode
